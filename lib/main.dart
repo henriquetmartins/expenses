@@ -1,3 +1,4 @@
+import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
 import 'package:flutter/material.dart';
 import 'models/transaction.dart';
@@ -43,25 +44,38 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Transaction> _transactions = [
     // Transaction(
+    //   id: 't0',
+    //   title: "Blusa Cropped",
+    //   value: 55.90,
+    //   date: DateTime.now().subtract(Duration(days: 33)),
+    // ),
+    // Transaction(
     //   id: 't1',
     //   title: "Tenis Novo",
     //   value: 330.00,
-    //   date: DateTime.now(),
+    //   date: DateTime.now().subtract(Duration(days: 3)),
     // ),
     // Transaction(
     //   id: 't2',
-    //   title: "Camisa Chavosa",
+    //   title: "Camisa de Time",
     //   value: 150.90,
-    //   date: DateTime.now(),
+    //   date: DateTime.now().subtract(Duration(days: 1)),
     // ),
   ];
 
-  _addTransaction(String title, double value) {
+  List<Transaction> get _recentTransactions {
+    return _transactions
+        .where((element) =>
+            element.date.isAfter(DateTime.now().subtract(Duration(days: 7))))
+        .toList();
+  }
+
+  _addTransaction(String title, double value, DateTime dateTime) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
-      date: DateTime.now(),
+      date: dateTime,
     );
 
     setState(() {
@@ -69,6 +83,12 @@ class _HomePageState extends State<HomePage> {
     });
 
     Navigator.of(context).pop();
+  }
+
+  _removeTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((element) => element.id == id);
+    });
   }
 
   _openTransactionFormModal(BuildContext context) {
@@ -99,18 +119,18 @@ class _HomePageState extends State<HomePage> {
             Container(
               width: double.infinity,
               child: Card(
-                color: Colors.blueAccent,
-                child: Text('Gráfico'),
+                color: Theme.of(context).accentColor,
+                child: Chart(_recentTransactions),
                 elevation: 5,
               ),
             ),
-            TransactionList(_transactions),
+            TransactionList(_transactions, _removeTransaction),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => _openTransactionFormModal(context),
+        onPressed: () => null,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
